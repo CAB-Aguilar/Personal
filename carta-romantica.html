@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta para Ti ❤️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #ffd6e0 0%, #ffb3c1 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            perspective: 1000px;
+        }
+
+        /* Sobre inicial */
+        .envelope {
+            width: 350px;
+            height: 250px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.6s ease;
+        }
+
+        .envelope:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope-base {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .envelope-base::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform-origin: top;
+            transition: transform 0.8s ease;
+            border-radius: 8px 8px 0 0;
+            clip-path: polygon(0 0, 50% 60%, 100% 0);
+            z-index: 2;
+        }
+
+        .envelope.opening .envelope-flap {
+            transform: rotateX(-180deg);
+        }
+
+        .heart-seal {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 3;
+        }
+
+        .click-text {
+            position: absolute;
+            bottom: 50px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Carta */
+        .letter {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: #fffef7;
+            border-radius: 12px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .letter.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .letter-content {
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            min-height: 500px;
+        }
+
+        .letter-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .letter-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .letter-content::-webkit-scrollbar-thumb {
+            background: #ffb3c1;
+            border-radius: 10px;
+        }
+
+        /* Secciones de texto */
+        .section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 40px;
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            pointer-events: none;
+        }
+
+        .section.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+
+        .section.exit {
+            opacity: 0;
+            transform: translateY(-50px) scale(0.95);
+        }
+
+        .section-title {
+            font-size: 28px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .section-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+            text-align: justify;
+            white-space: pre-line;
+        }
+
+        .section-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            margin: 30px auto;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Botón continuar */
+        .continue-btn {
+            display: block;
+            margin: 40px auto 20px;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.6);
+        }
+
+        .continue-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .continue-btn.hidden {
+            display: none;
+        }
+
+        /* Decoración de fondo */
+        .letter::before {
+            content: '❤️';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 40px;
+            opacity: 0.3;
+        }
+
+        .letter::after {
+            content: '❤️';
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 40px;
+            opacity: 0.3;
+        }
+
+        /* Firma */
+        .signature {
+            text-align: right;
+            font-size: 24px;
+            font-style: italic;
+            color: #e74c3c;
+            margin-top: 50px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease 0.5s;
+        }
+
+        .signature.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s ease;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Animación de corazones flotantes */
+        @keyframes float-hearts {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .floating-heart {
+            position: fixed;
+            font-size: 30px;
+            animation: float-hearts 6s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay oscuro -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Sobre inicial -->
+    <div class="container">
+        <div class="envelope" id="envelope">
+            <div class="envelope-base">
+                <div class="heart-seal">❤️</div>
+                <div class="click-text">Click Para Abrir</div>
+            </div>
+            <div class="envelope-flap"></div>
+        </div>
+    </div>
+
+    <!-- Carta -->
+    <div class="letter" id="letter">
+        <div class="letter-content" id="letterContent">
+            <!-- ==================== EDITA AQUÍ TUS SECCIONES ==================== -->
+
+            <!-- SECCIÓN 1: Solo texto -->
+            <div class="section">
+                <h2 class="section-title">Para ti, mi amor...</h2>
+                <p class="section-text">Hoy quiero detener el tiempo y dedicarte estas palabras que nacen desde lo más profundo de mi corazón.
+
+Cada día a tu lado es un regalo que atesoro con todo mi ser. Tu sonrisa ilumina mis mañanas, tu voz es la melodía que calma mi alma, y tu presencia es el hogar donde siempre quiero estar.
+
+No importa cuántas estrellas brillen en el cielo, ninguna se compara con la luz que traes a mi vida.</p>
+                <button class="continue-btn" onclick="nextSection()">Continuar →</button>
+            </div>
+
+            <!-- SECCIÓN 2: Texto con imagen -->
+            <div class="section">
+                <h2 class="section-title">Cada momento contigo...</h2>
+
+                <!-- Para agregar imagen, descomenta la línea siguiente y pon el nombre de tu archivo -->
+                <!-- <img src="mi-foto.jpg" alt="Nuestra foto" class="section-image"> -->
+
+                <p class="section-text">He aprendido que el amor verdadero no se mide en grandes gestos, sino en los pequeños detalles: tu mano entrelazada con la mía, esa mirada cómplice que solo nosotros entendemos, las risas compartidas y hasta los silencios que nos dicen más que mil palabras.
+
+Contigo he descubierto que amar es crecer juntos, apoyarnos en las tormentas y celebrar cada victoria como si fuera la más importante del mundo.</p>
+                <button class="continue-btn" onclick="nextSection()">Continuar →</button>
+            </div>
+
+            <!-- SECCIÓN 3: Solo texto -->
+            <div class="section">
+                <h2 class="section-title">Mi promesa eterna</h2>
+                <p class="section-text">Prometo estar a tu lado en cada paso del camino, ser tu refugio cuando el mundo se sienta pesado, y tu cómplice en cada aventura que decidamos emprender.
+
+Prometo amarte en tus días brillantes y también en aquellos grises, porque el verdadero amor no huye ante las dificultades, sino que se fortalece.
+
+Eres y serás siempre mi persona favorita, mi confidente, mi mejor amigo y el amor de mi vida.</p>
+                <button class="continue-btn" onclick="nextSection()">Continuar →</button>
+            </div>
+
+            <!-- SECCIÓN 4: Solo imagen (ejemplo) -->
+            <div class="section">
+                <h2 class="section-title">Nuestro recuerdo favorito</h2>
+                <!-- <img src="recuerdo.jpg" alt="Nuestro momento especial" class="section-image"> -->
+                <button class="continue-btn" onclick="nextSection()">Continuar →</button>
+            </div>
+
+            <!-- SECCIÓN 5 (FINAL): Texto con firma -->
+            <div class="section">
+                <h2 class="section-title">Para siempre...</h2>
+                <p class="section-text">Gracias por elegirme cada día, por llenar mi vida de color y por ser exactamente quien eres.
+
+Te amo más de lo que las palabras pueden expresar, y seguiré demostrándotelo cada día de nuestra vida juntos.
+
+Esta carta es solo un pequeño reflejo de todo lo que guardas en mi corazón.
+
+Con todo mi amor, hoy y siempre.</p>
+                <div class="signature">Tuyo para siempre ❤️</div>
+            </div>
+
+            <!-- ==================== AGREGA MÁS SECCIONES AQUÍ ==================== -->
+            <!--
+            PLANTILLA PARA NUEVA SECCIÓN CON TEXTO:
+
+            <div class="section">
+                <h2 class="section-title">Título de la sección</h2>
+                <p class="section-text">Tu texto aquí...</p>
+                <button class="continue-btn" onclick="nextSection()">Continuar →</button>
+            </div>
+            -->
+
+            <!--
+            PLANTILLA PARA NUEVA SECCIÓN CON IMAGEN:
+
+            <div class="section">
+                <h2 class="section-title">Título de la sección</h2>
+                <img src="nombre-imagen.jpg" alt="Descripción" class="section-image">
+                <p class="section-text">Texto opcional debajo de la imagen...</p>
+                <button class="continue-btn" onclick="nextSection()">Continuar →</button>
+            </div>
+            -->
+
+        </div>
+    </div>
+
+    <script>
+        let currentSection = 0;
+        let sections = [];
+        let heartInterval;
+
+        // Inicializar al cargar
+        window.addEventListener('DOMContentLoaded', function() {
+            sections = document.querySelectorAll('.section');
+        });
+
+        // Abrir sobre
+        document.getElementById('envelope').addEventListener('click', function() {
+            this.classList.add('opening');
+            document.getElementById('overlay').classList.add('show');
+
+            setTimeout(() => {
+                document.getElementById('letter').classList.add('show');
+                showSection(0);
+                startFloatingHearts();
+            }, 800);
+
+            setTimeout(() => {
+                this.style.display = 'none';
+            }, 1000);
+        });
+
+        // Mostrar sección específica
+        function showSection(index) {
+            if (sections[index]) {
+                sections[index].classList.add('active');
+
+                // Mostrar firma si existe en esta sección
+                const signature = sections[index].querySelector('.signature');
+                if (signature) {
+                    setTimeout(() => {
+                        signature.classList.add('visible');
+                    }, 500);
+                }
+            }
+        }
+
+        // Siguiente sección con transición
+        function nextSection() {
+            const current = sections[currentSection];
+
+            // Animar salida de la sección actual
+            current.classList.add('exit');
+
+            setTimeout(() => {
+                current.classList.remove('active', 'exit');
+                currentSection++;
+
+                // Verificar si hay más secciones
+                if (currentSection < sections.length) {
+                    showSection(currentSection);
+                }
+            }, 600);
+        }
+
+        // Corazones flotantes
+        function startFloatingHearts() {
+            heartInterval = setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.textContent = '❤️';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                heart.style.bottom = '-50px';
+
+                document.body.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 7000);
+            }, 800);
+        }
+
+        // Cerrar carta al hacer click en overlay
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('letter').classList.remove('show');
+            this.classList.remove('show');
+            clearInterval(heartInterval);
+
+            setTimeout(() => {
+                location.reload();
+            }, 800);
+        });
+    </script>
+</body>
+</html>
